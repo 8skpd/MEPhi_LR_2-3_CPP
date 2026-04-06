@@ -35,7 +35,7 @@ public:
     virtual Sequence<T>* Concat(Sequence<T>* list) = 0;
     virtual Sequence<T>* GetSubsequence(int start, int end) = 0;
 
-    virtual T TryGet(int index, bool& success) = 0;// трай семантику переписать на булл
+    virtual T TryGet(int index, bool& success) = 0;
     virtual T TryFirst(bool& success) = 0;
     virtual T TryLast(bool& success) = 0;
     

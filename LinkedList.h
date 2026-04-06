@@ -15,7 +15,7 @@ private:
     Node* head;
     int length;
 
-    void clear() {
+LinkedList<T>& clear() {
         Node* current = head;
         while (current != nullptr) {
             Node* next = current->next;
@@ -24,23 +24,27 @@ private:
         }
         head = nullptr;
         length = 0;
+        return *this;
     }
 
-    void copyFrom(const LinkedList<T>& other) {
+    LinkedList<T>& copyFrom(const LinkedList<T>& other) {
         clear();
         Node* current = other.head;
         Node* tail = nullptr;
+        
         while (current != nullptr) {
             Node* newNode = new Node(current->value);
             if (head == nullptr) {
                 head = newNode;
+                tail = newNode;
             } else {
                 tail->next = newNode;
+                tail = newNode;
             }
-            tail = newNode;
             current = current->next;
             length++;
         }
+        return *this;
     }
 
 public:
@@ -102,7 +106,7 @@ public:
         return current->value;
     }
 
-    void Append(T item) {
+    LinkedList<T>& Append(T item) {
         Node* newNode = new Node(item);
         if (head == nullptr) {
             head = newNode;
@@ -114,29 +118,33 @@ public:
             current->next = newNode;
         }
         length++;
+        return *this;
     }
 
-    void Prepend(T item) {//return this* надо
+    LinkedList<T>& Prepend(T item) {
         Node* newNode = new Node(item);
         newNode->next = head;
         head = newNode;
         length++;
+        return *this;
     }
 
-    void InsertAt(T item, int index) {
-        if (index < 0 || index >= length) throw IndexOutOfRange();
+    LinkedList<T>& InsertAt(T item, int index) {
+        if (index < 0 || index > length) throw IndexOutOfRange();
+        
         if (index == 0) {
             Prepend(item);
-            return;
+        } else {
+            Node* current = head;
+            for (int i = 0; i < index - 1; i++) {
+                current = current->next;
+            }
+            Node* newNode = new Node(item);
+            newNode->next = current->next;
+            current->next = newNode;
+            length++;
         }
-        Node* current = head;
-        for (int i = 0; i < index - 1; i++) {
-            current = current->next;
-        }
-        Node* newNode = new Node(item);
-        newNode->next = current->next;
-        current->next = newNode;
-        length++;
+        return *this;
     }
 
     LinkedList<T>* GetSubList(int start, int end) const {

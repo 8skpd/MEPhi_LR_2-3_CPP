@@ -65,9 +65,12 @@ public:
         return data[index];
     }
 
-    void Set(int index, T value) {
-        if (index < 0 || index >= size) throw IndexOutOfRange();
+    DynamicArray<T>& Set(int index, T value) {
+        if (index < 0 || index >= size) {
+            throw IndexOutOfRange();
+        }
         data[index] = value;
+        return *this;
     }
 
     size_t GetSize() const {

@@ -36,11 +36,14 @@ public:
         delete data; 
     }
 
-    void PushFront(T item) { 
+    Deque<T>& PushFront(T item) { 
         data = data->Prepend(item); 
+        return *this; 
     }
-    void PushBack(T item) { 
+
+    Deque<T>& PushBack(T item) { 
         data = data->Append(item); 
+        return *this; 
     }
     
     T PopFront() {
@@ -110,7 +113,6 @@ public:
         Deque<T> result;
         // Очищаем данные нового дека (так как конструктор создал пустую последовательность)
         delete result.data;
-        
         // Клонируем левую часть
         Sequence<T>* newSeq = this->data->Clone();
         
@@ -174,9 +176,10 @@ public:
         return false;
     }
 
-    void Sort() {
+    Deque<T>& Sort() {
         int len = data->GetLength();
-        if (len <= 1) return;
+        if (len <= 1) return *this; // Возвращаем*this сразу, если сортировать нечего
+
         T** ptrs = new T*[len];
 
         for (int i = 0; i < len; ++i) {
@@ -185,8 +188,6 @@ public:
 
         for (int i = 0; i < len - 1; ++i) {
             for (int j = 0; j < len - i - 1; ++j) {
-                if (ptrs[j] == nullptr || ptrs[j+1] == nullptr) continue;
-                
                 if (*ptrs[j] > *ptrs[j + 1]) {
                     T* temp = ptrs[j];
                     ptrs[j] = ptrs[j + 1];
@@ -196,49 +197,56 @@ public:
         }
 
         Sequence<T>* sortedSeq = data->CreateEmpty();
-
         for (int i = 0; i < len; ++i) {
             sortedSeq = sortedSeq->Append(*ptrs[i]);
         }
-
         delete data;
         data = sortedSeq;
         delete[] ptrs;
+        return *this;
     }
 
-    void Merge(Deque& other) {
+    Deque<T>& Merge(Deque<T>& other) {
+        if (other.data->GetLength() == 0) return *this;
+        if (data->GetLength() == 0) {
+            delete data;
+            data = other.data->Clone();
+            return *this;
+        }
         Sequence<T>* res = data->CreateEmpty();
-        Sequence<T>* s1 = data->Clone();
-        Sequence<T>* s2 = other.data->Clone();
-        while(s1->GetLength() && s2->GetLength()) {
-            if(s1->GetFirst() <= s2->GetFirst()) {
-                res = res->Append(s1->GetFirst());
-                Sequence<T>* tmp = (s1->GetLength()==1) ? s1->CreateEmpty() : s1->GetSubsequence(1, s1->GetLength()-1);
-                delete s1; 
-                s1 = tmp;
+        typename Sequence<T>::IEnumerator* it1 = data->GetEnumerator();
+        typename Sequence<T>::IEnumerator* it2 = other.data->GetEnumerator();
+        bool has1 = it1->MoveNext();
+        bool has2 = it2->MoveNext();
+
+        while (has1 && has2) {
+            T val1 = it1->GetCurrent();
+            T val2 = it2->GetCurrent();
+
+            if (val1 <= val2) {
+                res = res->Append(val1);
+                has1 = it1->MoveNext();
             } else {
-                res = res->Append(s2->GetFirst());
-                Sequence<T>* tmp = (s2->GetLength()==1) ? s2->CreateEmpty() : s2->GetSubsequence(1, s2->GetLength()-1);
-                delete s2; 
-                s2 = tmp;
+                res = res->Append(val2);
+                has2 = it2->MoveNext();
             }
         }
-        while(s1->GetLength()) {
-            res = res->Append(s1->GetFirst());
-            Sequence<T>* tmp = (s1->GetLength()==1) ? s1->CreateEmpty() : s1->GetSubsequence(1, s1->GetLength()-1);
-            delete s1; 
-            s1 = tmp;
+
+        while (has1) {
+            res = res->Append(it1->GetCurrent());
+            has1 = it1->MoveNext();
         }
-        while(s2->GetLength()) {
-            res = res->Append(s2->GetFirst());
-            Sequence<T>* tmp = (s2->GetLength()==1) ? s2->CreateEmpty() : s2->GetSubsequence(1, s2->GetLength()-1);
-            delete s2; 
-            s2 = tmp;
+
+        while (has2) {
+            res = res->Append(it2->GetCurrent());
+            has2 = it2->MoveNext();
         }
-        delete data; 
-        data = res; 
-        delete s1; 
-        delete s2;
+
+        delete it1;
+        delete it2;
+        delete data;
+        data = res;
+        return *this;
     }
 
     int CountInversions() const {
