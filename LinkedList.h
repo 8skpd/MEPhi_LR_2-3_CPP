@@ -116,7 +116,7 @@ public:
         length++;
     }
 
-    void Prepend(T item) {
+    void Prepend(T item) {//return this* надо
         Node* newNode = new Node(item);
         newNode->next = head;
         head = newNode;

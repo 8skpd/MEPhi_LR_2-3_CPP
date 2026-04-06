@@ -108,7 +108,7 @@ inline Tuple<typename std::decay<Args>::type...> MakeTuple(Args&&... args) {
     return Tuple<typename std::decay<Args>::type...>(std::forward<Args>(args)...);
 }
 
-// Утилита для вывода (опционально)
+// Утилита для вывода
 template <size_t Index = 0, typename... Types>
 typename std::enable_if<Index == sizeof...(Types), void>::type
 PrintTupleImpl(const Tuple<Types...>&, std::ostream&) {}

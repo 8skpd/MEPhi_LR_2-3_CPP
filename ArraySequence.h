@@ -128,6 +128,7 @@ public:
     }
 
     typename Sequence<T>::IEnumerator* GetEnumerator() override {
+        //return Sequence<T>::GetEnumerator();
         return new typename Sequence<T>::SequenceEnumerator(this, this->items->GetSize());
     }
 
@@ -163,7 +164,9 @@ protected:
 public:
     MutableArraySequence() : BaseArraySequence<T>() {}
     MutableArraySequence(T* arr, int count) : BaseArraySequence<T>(arr, count) {}
-    Sequence<T>* CreateEmpty() const override { return new MutableArraySequence<T>(); }
+    Sequence<T>* CreateEmpty() const override { 
+        return new MutableArraySequence<T>(); 
+    }
 };
 
 template <class T>
