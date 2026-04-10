@@ -3,6 +3,7 @@
 
 #include "Exceptions.h"
 #include "MyUtility.h"
+#include "Option.h"
 
 template <class T>
 class Sequence {
@@ -35,9 +36,9 @@ public:
     virtual Sequence<T>* Concat(Sequence<T>* list) = 0;
     virtual Sequence<T>* GetSubsequence(int start, int end) = 0;
 
-    virtual T TryGet(int index, bool& success) = 0;
-    virtual T TryFirst(bool& success) = 0;
-    virtual T TryLast(bool& success) = 0;
+    virtual Option<T> TryGet(int index) const = 0;
+    virtual Option<T> TryFirst() const = 0;
+    virtual Option<T> TryLast() const = 0;
     
     virtual T& operator[](int index) = 0;
     virtual const T& operator[](int index) const = 0;

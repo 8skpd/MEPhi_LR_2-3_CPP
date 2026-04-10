@@ -2,6 +2,7 @@
 #define LIST_SEQUENCE_H
 
 #include "Sequence.h"
+#include "Option.h"
 #include "LinkedList.h"
 #include "MyUtility.h"
 #include <iostream>
@@ -81,35 +82,26 @@ public:
     Sequence<Pair<T, U>>* Zip(Sequence<U>* other);
 
     // Try-Semantics
-    T TryGet(int index, bool& success) override {
-        try { 
-            success = true; 
-            return list->Get(index); 
-        }
-        catch (...) { 
-            success = false; 
-            return T(); 
+    Option<T> TryGet(int index) const override {
+        try {
+            return Option<T>::Some(this->list->Get(index));
+        } catch (...) {
+            return Option<T>::None();
         }
     }
 
-    T TryFirst(bool& success) override {
-        try { 
-            success = true; 
-            return GetFirst(); 
+    Option<T> TryFirst() const override {
+        if (this->list->GetLength() == 0) {
+            return Option<T>::None();
         }
-        catch (...) { success = false;
-            return T(); 
-        }
+        return Option<T>::Some(this->list->GetFirst());
     }
 
-    T TryLast(bool& success) override {
-        try { 
-            success = true;
-            return GetLast(); }
-        catch (...) { 
-            success = false;
-            return T(); 
+    Option<T> TryLast() const override {
+        if (this->list->GetLength() == 0) {
+            return Option<T>::None();
         }
+        return Option<T>::Some(this->list->GetLast());
     }
 
     // Реализация интерфейса Sequence через Instance()

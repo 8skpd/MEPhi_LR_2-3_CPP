@@ -2,6 +2,7 @@
 #define ARRAY_SEQUENCE_H
 
 #include "Sequence.h"
+#include "Option.h"
 #include "DynamicArray.h"
 
 template <class T> class MutableArraySequence;
@@ -97,34 +98,25 @@ public:
         return res;
     }
 
-    T TryGet(int index, bool& success) override {
-        try { 
-            success=true; 
-            return Get(index); 
-        } catch(...) { 
-            success=false; 
-            return T(); 
+    Option<T> TryGet(int index) const override {
+        if (index < 0 || index >= this->items->GetSize()) {
+            return Option<T>::None();
         }
+        return Option<T>::Some(this->items->Get(index));
     }
 
-    T TryFirst(bool& success) override {
-        try { 
-            success=true; 
-            return GetFirst(); 
-        } catch(...) { 
-            success=false; 
-            return T(); 
+    Option<T> TryFirst() const override {
+        if (this->items->GetSize() == 0) {
+            return Option<T>::None();
         }
+        return Option<T>::Some(this->items->Get(0));
     }
 
-    T TryLast(bool& success) override {
-        try { 
-            success=true; 
-            return GetLast(); 
-        } catch(...) { 
-            success=false; 
-            return T(); 
+    Option<T> TryLast() const override {
+        if (this->items->GetSize() == 0) {
+            return Option<T>::None();
         }
+        return Option<T>::Some(this->items->Get(this->items->GetSize() - 1));
     }
 
     typename Sequence<T>::IEnumerator* GetEnumerator() override {

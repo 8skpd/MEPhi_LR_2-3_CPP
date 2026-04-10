@@ -70,22 +70,46 @@ void testSequenceBasics() {
     Sequence<int>* seqArr = new MutableArraySequence<int>(arr, 5);
     Sequence<int>* seqList = new MutableListSequence<int>(arr, 5);
     
-    // ArraySequence
+    // --- Тесты ArraySequence ---
     test(seqArr->GetLength() == 5, "ArraySeq Length");
     test(seqArr->GetFirst() == 1, "ArraySeq First");
     test(seqArr->GetLast() == 5, "ArraySeq Last");
+    test(seqArr->Get(2) == 3, "ArraySeq Get index");
     
-    // ListSequence
+    // --- Тесты ListSequence ---
     test(seqList->GetLength() == 5, "ListSeq Length");
     test(seqList->Get(2) == 3, "ListSeq Get index");
+    test(seqList->GetFirst() == 1, "ListSeq First");
+    test(seqList->GetLast() == 5, "ListSeq Last");
     
-    // Try semantics
-    bool success = false;
-    int val = seqArr->TryGet(10, success);
-    test(!success, "TryGet invalid index fails");
     
-    val = seqArr->TryGet(0, success);
-    test(success && val == 1, "TryGet valid index succeeds");
+    // 1. Проверка выхода за границы (должно вернуть None)
+    Option<int> optInvalid = seqArr->TryGet(10);
+    test(optInvalid.IsNone(), "TryGet invalid index returns None");
+    test(!optInvalid, "TryGet invalid index operator bool is false");
+
+    // 2. Проверка валидного индекса (должно вернуть Some)
+    Option<int> optValid = seqArr->TryGet(0);
+    test(optValid.IsSome(), "TryGet valid index returns Some");
+    test(optValid.GetValue() == 1, "TryGet valid index value is correct");
+
+    // 3. Проверка TryFirst / TryLast на непустой последовательности
+    test(seqArr->TryFirst().GetValue() == 1, "TryFirst returns correct value");
+    test(seqArr->TryLast().GetValue() == 5, "TryLast returns correct value");
+
+    // 4. Проверка TryFirst / TryLast на пустой последовательности
+    Sequence<int>* emptySeq = new MutableArraySequence<int>();
+    
+    Option<int> optEmptyFirst = emptySeq->TryFirst();
+    test(optEmptyFirst.IsNone(), "TryFirst on empty returns None");
+
+    Option<int> optEmptyLast = emptySeq->TryLast();
+    test(optEmptyLast.IsNone(), "TryLast on empty returns None");
+    
+    Option<int> optEmptyGet = emptySeq->TryGet(0);
+    test(optEmptyGet.IsNone(), "TryGet on empty returns None");
+
+    delete emptySeq;
 
     delete seqArr;
     delete seqList;
