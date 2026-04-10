@@ -14,18 +14,26 @@ public:
     Option() : hasValue(false), value(T()) {}
     Option(const T& val) : hasValue(true), value(val) {}
 
-    bool IsSome() const { return hasValue; }
-    bool IsNone() const { return !hasValue; }
+    bool IsSome() const { 
+        return hasValue; 
+    }
+    bool IsNone() const { 
+        return !hasValue; 
+    }
 
     T GetValue() const {
         if (!hasValue) throw std::runtime_error("Accessing None value in Option");
         return value;
     }
 
-    explicit operator bool() const { return hasValue; }
+    explicit operator bool() const {
+         return hasValue; 
+        }
 
     static Option<T> None() { return Option<T>(); }
-    static Option<T> Some(const T& val) { return Option<T>(val); }
+    static Option<T> Some(const T& val) {
+         return Option<T>(val); 
+        }
 };
 
 template <class T>
