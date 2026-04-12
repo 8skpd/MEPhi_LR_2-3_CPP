@@ -70,13 +70,13 @@ void testSequenceBasics() {
     Sequence<int>* seqArr = new MutableArraySequence<int>(arr, 5);
     Sequence<int>* seqList = new MutableListSequence<int>(arr, 5);
     
-    // --- Тесты ArraySequence ---
+    // Тесты ArraySequence
     test(seqArr->GetLength() == 5, "ArraySeq Length");
     test(seqArr->GetFirst() == 1, "ArraySeq First");
     test(seqArr->GetLast() == 5, "ArraySeq Last");
     test(seqArr->Get(2) == 3, "ArraySeq Get index");
     
-    // --- Тесты ListSequence ---
+    // Тесты ListSequence
     test(seqList->GetLength() == 5, "ListSeq Length");
     test(seqList->Get(2) == 3, "ListSeq Get index");
     test(seqList->GetFirst() == 1, "ListSeq First");
@@ -452,6 +452,91 @@ void testCustomTuple() {
 
 }
 
+void testEnsureMethods() {
+    printSection("LR2: EnsureArray & EnsureList Methods");
+
+    int arr[] = {10, 20, 30, 40, 50};
+    const int size = 5;
+
+    // Тест 1: List -> EnsureArray (Конвертация)
+    {
+        Sequence<int>* listSeq = new MutableListSequence<int>(arr, size);
+        Sequence<int>* result = listSeq->EnsureArray();
+        
+        test(dynamic_cast<BaseArraySequence<int>*>(result) != nullptr, "EnsureArray: Result is ArraySequence");
+        test(result->GetLength() == size, "EnsureArray: Length preserved");
+        test(result->Get(0) == 10 && result->Get(4) == 50, "EnsureArray: Data preserved");
+        
+        // Так как тип изменился, указатели разные -> удаляем оба
+        delete listSeq;
+        delete result;
+    }
+
+    // Тест 2: Array -> EnsureArray (Оптимизация / Same Pointer)
+    {
+        Sequence<int>* arraySeq = new MutableArraySequence<int>(arr, size);
+        Sequence<int>* result = arraySeq->EnsureArray();
+        
+        // Проверяем, что указатели совпадают (копия не создавалась)
+        test(result == arraySeq, "EnsureArray on Array: Returns same pointer");
+        test(dynamic_cast<BaseArraySequence<int>*>(result) != nullptr, "EnsureArray on Array: Type correct");
+        
+        // Удаляем только один раз
+        delete arraySeq; 
+    }
+
+    // Тест 3: Array -> EnsureList (Конвертация)
+    {
+        Sequence<int>* arraySeq = new MutableArraySequence<int>(arr, size);
+        Sequence<int>* result = arraySeq->EnsureList();
+        
+        test(dynamic_cast<BaseListSequence<int>*>(result) != nullptr, "EnsureList: Result is ListSequence");
+        test(result->GetLength() == size, "EnsureList: Length preserved");
+        test(result->Get(2) == 30, "EnsureList: Middle element correct");
+        
+        delete arraySeq;
+        delete result;
+    }
+
+    // Тест 4: List -> EnsureList (Оптимизация)
+    {
+        Sequence<int>* listSeq = new MutableListSequence<int>(arr, size);
+        Sequence<int>* result = listSeq->EnsureList();
+        
+        test(result == listSeq, "EnsureList on List: Returns same pointer");
+        test(dynamic_cast<BaseListSequence<int>*>(result) != nullptr, "EnsureList on List: Type correct");
+        
+        delete listSeq;
+    }
+
+    // Тест 5: Методы-синонимы ToArray и ToList
+    {
+        Sequence<int>* listForArray = new MutableListSequence<int>(arr, 3);
+        Sequence<int>* arrRes = listForArray->ToArray();
+        test(dynamic_cast<BaseArraySequence<int>*>(arrRes) != nullptr, "ToArray: Converts to Array");
+        delete listForArray;
+        delete arrRes;
+
+        Sequence<int>* arrayForList = new MutableArraySequence<int>(arr, 3);
+        Sequence<int>* listRes = arrayForList->ToList();
+        test(dynamic_cast<BaseListSequence<int>*>(listRes) != nullptr, "ToList: Converts to List");
+        delete arrayForList;
+        delete listRes;
+    }
+
+    // Тест 6: Пустая последовательность
+    {
+        Sequence<int>* emptyList = new MutableListSequence<int>();
+        Sequence<int>* emptyArr = emptyList->EnsureArray();
+        
+        test(emptyArr->GetLength() == 0, "EnsureArray on Empty: Length is 0");
+        test(dynamic_cast<BaseArraySequence<int>*>(emptyArr) != nullptr, "EnsureArray on Empty: Type is Array");
+        
+        delete emptyList;
+        delete emptyArr;
+    }
+}
+
 void runAllLR2Tests() {
     printSection("STARTING LR2 TESTS");
     testDynamicArray();
@@ -462,6 +547,7 @@ void runAllLR2Tests() {
     testIterators();
     testConverters();
     testCustomTuple();
+    testEnsureMethods();
     
     std::cout << "\n>>> LR2 Summary: " << testsPassed << " passed, " << testsFailed << " failed." << std::endl;
 }
@@ -641,7 +727,7 @@ void runUI() {
     int choice, value;
     
     while (true) {
-        std::cout << "\n--- Menu ---" << std::endl;
+        std::cout << "\n--- Menu" << std::endl;
         std::cout << "1. Push Front" << std::endl;
         std::cout << "2. Push Back" << std::endl;
         std::cout << "3. Pop Front" << std::endl;
